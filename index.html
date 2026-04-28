@@ -1,129 +1,962 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="PkLa_ViOo6FAHpvh8SacceMb95o9tePRdrqLNBz9X1M" />
-    <title>Debian System Tools – Logs, Network, Performance & Package Management</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="PkLa_ViOo6FAHpvh8SacceMb95o9tePRdrqLNBz9X1M" />
+<meta name="robots" content="index, follow">
 
-    <meta name="description" content="Optimize and analyze Debian systems with tools for logs, networking, performance, repositories, services and dependency management.">
+<title>Debian Network Monitoring Tools – System Monitor Guide &amp; APT Command Builder</title>
 
-    <meta name="keywords" content="debian log analyzer, debian network troubleshooting tools, debian performance monitoring, apt dependency checker, debian service manager, linux debian tools">
+<meta name="description" content="Complete guide to Debian network monitoring tools. Covers nmap, iftop, nethogs, wireshark, ss, netstat, htop, btop, glances, and GNOME System Monitor. Includes apt install commands and a tool selector. Free reference.">
 
-    <link rel="canonical" href="/debian-tools/">
+<meta name="keywords" content="debian network monitoring tools, debian system monitor, debian net tools, debian network tools, debian monitoring tools, linux network monitoring debian, debian htop btop glances, apt network tools debian, iftop nethogs debian, debian performance monitoring">
+
+<link rel="canonical" href="https://franrivalbigprojects.github.io/debian-tools/">
+
+<meta property="og:title" content="Debian Network Monitoring Tools – System Monitor Guide">
+<meta property="og:description" content="Guide to Debian network monitoring tools with apt install commands. Covers iftop, nethogs, nmap, ss, htop, glances, btop, and GNOME System Monitor.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #050810;
+  --surface: #080d18;
+  --surface2: #0d1322;
+  --border: #121c2e;
+  --border2: #182840;
+  --deb: #d8232a;
+  --deb-dim: rgba(216,35,42,0.12);
+  --deb-dim2: rgba(216,35,42,0.05);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.1);
+  --green-dim2: rgba(34,197,94,0.05);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.08);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251,191,36,0.08);
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.08);
+  --text: #b8cce0;
+  --text-muted: #3a5570;
+  --text-dim: #0f1e30;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --r: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+header {
+  border-bottom: 1px solid var(--border2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,16,0.96);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--deb);
+  background: var(--deb-dim2);
+  border: 1px solid rgba(216,35,42,0.3);
+  border-radius: 3px;
+  padding: 3px 9px;
+}
+
+.logo-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.logo-text strong { color: var(--deb); font-weight: 500; }
+
+.wrapper {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* HERO */
+.hero {
+  padding: 48px 0 34px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 28px;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--deb);
+  margin-bottom: 14px;
+  opacity: 0.8;
+}
+
+h1 {
+  font-size: clamp(22px, 3.2vw, 30px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+h1 em { font-style: normal; color: var(--deb); }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 620px;
+  line-height: 1.75;
+  margin-bottom: 18px;
+}
+
+.hero-sub strong { color: var(--text); }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.pill-deb { color: var(--deb); background: var(--deb-dim2); border-color: rgba(216,35,42,0.3); }
+.pill-dim { color: var(--text-muted); border-color: var(--border2); }
+
+/* APT BUILDER TOOL */
+.tool-shell {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.tool-topbar {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border2);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topbar-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tool-body { padding: 18px 20px; }
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.tool-toggle {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.tool-toggle:hover { border-color: rgba(216,35,42,0.3); }
+.tool-toggle.selected { border-color: var(--deb); background: var(--deb-dim2); }
+
+.tt-name {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.tool-toggle.selected .tt-name { color: var(--deb); }
+
+.tt-cat {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.tt-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Command output */
+.cmd-output {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--deb);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--green);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  word-break: break-all;
+}
+
+.cmd-text { flex: 1; }
+.cmd-placeholder { color: var(--text-dim); font-size: 12px; }
+
+.copy-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 14px;
+  background: var(--green-dim2);
+  color: var(--green);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover { opacity: 0.75; }
+
+/* CATEGORY TABS */
+.cat-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.cat-tab {
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.cat-tab:hover { border-color: var(--deb); color: var(--text); }
+.cat-tab.active { border-color: var(--deb); background: var(--deb-dim2); color: var(--deb); }
+
+/* SECTION */
+hr.divider { border: none; border-top: 1px solid var(--border2); margin: 50px 0; }
+.content-section { margin-bottom: 50px; }
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.sec-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--deb);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.sec-rule { flex: 1; height: 1px; background: var(--border2); }
+
+p { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; max-width: 820px; }
+p strong { color: var(--text); }
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--surface2);
+  color: var(--deb);
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+}
+
+/* TOOL REFERENCE TABLE */
+.ref-table {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.rt-row {
+  display: grid;
+  grid-template-columns: 110px 180px 1fr 120px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.rt-row:last-child { border-bottom: none; }
+.rt-row.rt-head { background: var(--surface2); }
+.rt-row:hover:not(.rt-head) { background: rgba(216,35,42,0.02); }
+
+.rt-cell {
+  padding: 9px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+}
+
+.rt-cell:last-child { border-right: none; }
+.rt-head .rt-cell { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.rt-name { color: var(--deb); font-weight: 600; }
+.rt-cmd  { color: var(--green); }
+
+.cat-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.cb-net  { color: var(--blue);   background: var(--blue-dim);   border-color: rgba(96,165,250,0.25); }
+.cb-sys  { color: var(--green);  background: var(--green-dim2); border-color: rgba(34,197,94,0.25); }
+.cb-proc { color: var(--yellow); background: var(--yellow-dim); border-color: rgba(251,191,36,0.25); }
+.cb-disk { color: var(--orange); background: var(--orange-dim); border-color: rgba(249,115,22,0.25); }
+.cb-gui  { color: var(--text-muted); border-color: var(--border2); }
+
+/* CODE BLOCK */
+.code-block {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  border-radius: 5px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 12px 0;
+  color: var(--text-muted);
+}
+
+.ck  { color: var(--deb); }
+.cg  { color: var(--green); }
+.cm  { color: var(--text-dim); }
+.cy  { color: var(--yellow); }
+
+.dense-block {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 22px;
+  margin-top: 14px;
+}
+
+.dense-block p { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border2); }
+.dense-block p:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+.faq-list {
+  margin-top: 14px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.faq-item { border-bottom: 1px solid var(--border2); }
+.faq-item:last-child { border-bottom: none; }
+
+.faq-q {
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: none;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+}
+
+.faq-q:hover { background: var(--deb-dim2); }
+.faq-arrow { font-family: var(--mono); font-size: 11px; color: var(--text-dim); transition: transform 0.2s; flex-shrink: 0; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+.faq-a {
+  display: none;
+  padding: 0 18px 13px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  border-top: 1px solid var(--border2);
+  background: var(--bg);
+}
+
+.faq-item.open .faq-a { display: block; }
+.faq-a code { color: var(--deb); background: var(--deb-dim2); }
+
+.subtools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.stl {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  text-decoration: none;
+  display: block;
+  transition: border-color 0.15s;
+}
+
+.stl:hover { border-color: rgba(216,35,42,0.3); }
+.stl-eye  { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+.stl-name { font-family: var(--mono); font-size: 12px; color: var(--deb); font-weight: 500; }
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 50px; }
+
+.tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  padding: 4px 12px;
+  cursor: default;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tag:hover { color: var(--deb); border-color: rgba(216,35,42,0.3); }
+
+footer { border-top: 1px solid var(--border2); padding: 20px 0; position: relative; z-index: 1; }
+
+.footer-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin: 0; }
+
+@media (max-width: 680px) {
+  .tool-grid { grid-template-columns: 1fr 1fr; }
+  .rt-row    { grid-template-columns: 90px 140px 1fr; font-size: 10px; }
+  .rt-row .rt-cell:last-child { display: none; }
+}
+</style>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"Debian Network Monitoring Tools","description":"Complete guide to Debian network monitoring tools including iftop, nethogs, nmap, ss, netstat, wireshark, and system monitors htop, btop, glances. Includes apt install commands and tool selector.","keywords":"debian network monitoring tools, debian system monitor, debian net tools, debian network tools"}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What are the best Debian network monitoring tools?","acceptedAnswer":{"@type":"Answer","text":"Top Debian network monitoring tools: iftop (real-time bandwidth per connection, apt install iftop), nethogs (bandwidth per process, apt install nethogs), nmap (network scanning and discovery, apt install nmap), ss (socket statistics, built-in or apt install iproute2), wireshark (packet capture, apt install wireshark), netstat (connections overview, apt install net-tools), tcpdump (CLI packet capture, apt install tcpdump), bmon (bandwidth monitor, apt install bmon)."}},{"@type":"Question","name":"How do I install monitoring tools on Debian?","acceptedAnswer":{"@type":"Answer","text":"Use apt: sudo apt update && sudo apt install TOOLNAME. For network monitoring: sudo apt install iftop nethogs nmap wireshark bmon. For system monitoring: sudo apt install htop btop glances. For disk: sudo apt install iotop ncdu. Most tools require root for network capture (sudo iftop, sudo nethogs). Wireshark requires adding your user to the wireshark group: sudo usermod -aG wireshark $USER."}}]}
+</script>
+
 </head>
 
 <body>
 
 <header>
-    <h1>Debian System Tools – Monitoring, Debugging & Optimization</h1>
-    <p>
-        A collection of <strong>Debian system tools</strong> designed to help administrators
-        and developers <strong>monitor, debug, and optimize Linux systems</strong>
-        across networking, performance, services, and package management.
-    </p>
+  <div class="header-inner">
+    <span class="logo-pill">&#9632; DEB</span>
+    <span class="logo-text"><strong>debian</strong>-network-monitoring-tools</span>
+  </div>
 </header>
 
-<section>
-    <h2>📦 Package & Dependency Management</h2>
-    <ul>
-        <li><a href="/debian-tools/deps/">Dependency Analyzer</a> – Analyze package dependencies and conflicts</li>
-        <li><a href="/debian-tools/repo/">Repository Tool</a> – Manage and inspect APT repositories</li>
-    </ul>
-</section>
+<div class="wrapper">
 
-<section>
-    <h2>📊 Logs & Monitoring</h2>
-    <ul>
-        <li><a href="/debian-tools/logs/">Log Analyzer</a> – Parse and analyze system logs</li>
-    </ul>
-</section>
-
-<section>
-    <h2>🌐 Network Tools</h2>
-    <ul>
-        <li><a href="/debian-tools/network/">Network Analyzer</a> – Troubleshoot connectivity and performance</li>
-    </ul>
-</section>
-
-<section>
-    <h2>⚡ Performance Optimization</h2>
-    <ul>
-        <li><a href="/debian-tools/perf/">Performance Tool</a> – Monitor CPU, memory and system load</li>
-    </ul>
-</section>
-
-<section>
-    <h2>🛠️ Services & System Control</h2>
-    <ul>
-        <li><a href="/debian-tools/service/">Service Manager Tool</a> – Manage and debug system services</li>
-    </ul>
-</section>
-
-<section>
-    <h2>📊 What Do These Tools Help You Do?</h2>
-    <p>
-        These <strong>Debian tools</strong> help you:
+  <section class="hero">
+    <p class="hero-eyebrow">// Debian Linux Reference</p>
+    <h1><em>Debian Network Monitoring</em> Tools<br>System Monitor &amp; APT Command Builder</h1>
+    <p class="hero-sub">
+      Complete guide to <strong>Debian network monitoring tools</strong>: iftop, nethogs, nmap, ss, wireshark, htop, btop, glances, and GNOME System Monitor. Select tools to build your apt install command.
     </p>
-    <ul>
-        <li>Analyze system logs and detect issues</li>
-        <li>Troubleshoot network problems</li>
-        <li>Optimize system performance</li>
-        <li>Manage packages and dependencies</li>
-        <li>Control and monitor system services</li>
-    </ul>
-</section>
+    <div class="pill-row">
+      <span class="pill pill-deb">Network</span>
+      <span class="pill pill-deb">System Monitor</span>
+      <span class="pill pill-dim">apt install</span>
+      <span class="pill pill-dim">Process</span>
+      <span class="pill pill-dim">Disk I/O</span>
+    </div>
+  </section>
 
-<section>
-    <h2>🚀 Long-Tail Keywords & Search Intent</h2>
-    <ul>
-        <li>debian log analysis tool linux troubleshooting</li>
-        <li>apt dependency checker debian package conflicts</li>
-        <li>debian network troubleshooting commands and tools</li>
-        <li>linux performance monitoring debian server</li>
-        <li>systemctl service debugging debian linux</li>
-        <li>debian repository management apt sources tool</li>
-    </ul>
-</section>
+  <!-- APT BUILDER TOOL -->
 
-<section>
-    <h2>🧠 Why Debian Tools Matter</h2>
-    <p>
-        Debian is widely used in servers and production environments. These tools help
-        maintain stability, performance, and reliability in critical systems.
-    </p>
-</section>
+  <div class="tool-shell">
+    <div class="tool-topbar">
+      <span class="topbar-label">// APT Install Command Builder</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">Select tools to build the install command</span>
+    </div>
+    <div class="tool-body">
+      <div class="cat-tabs">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);align-self:center;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px;">Filter:</span>
+        <button class="cat-tab active" onclick="filterTools('all',this)">All</button>
+        <button class="cat-tab" onclick="filterTools('network',this)">Network</button>
+        <button class="cat-tab" onclick="filterTools('system',this)">System</button>
+        <button class="cat-tab" onclick="filterTools('process',this)">Process</button>
+        <button class="cat-tab" onclick="filterTools('disk',this)">Disk</button>
+        <button class="cat-tab" onclick="filterTools('gui',this)">GUI</button>
+      </div>
+      <div class="tool-grid" id="toolGrid"></div>
+      <div class="cmd-output" id="cmdOutput">
+        <span class="cmd-text cmd-placeholder" id="cmdText">Select tools above to generate the apt install command</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyCmd()" style="display:none;">Copy</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:8px;">
+        <button onclick="clearSelection()" style="font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;">Clear selection</button>
+        <span id="copyFb" style="font-family:var(--mono);font-size:11px;color:var(--green);align-self:center;display:none;">Copied!</span>
+      </div>
+    </div>
+  </div>
 
-<section>
-    <h2>❓ Frequently Asked Questions</h2>
+  <hr class="divider">
 
-    <h3>What is Debian used for?</h3>
-    <p>
-        Debian is a popular Linux distribution used for servers, development, and production systems.
-    </p>
+  <!-- NETWORK TOOLS REFERENCE -->
 
-    <h3>How do I check logs in Debian?</h3>
-    <p>
-        Logs can be accessed via system logs like /var/log or using tools like journalctl.
-    </p>
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Network monitoring tools</span>
+      <span class="sec-rule"></span>
+    </div>
+    <p><strong>Debian network monitoring tools</strong> let you inspect bandwidth usage, active connections, open ports, and network traffic at different levels of detail — from per-connection bandwidth to full packet capture.</p>
 
-    <h3>How can I monitor performance?</h3>
-    <p>
-        Use tools to track CPU, memory, disk usage, and load averages.
-    </p>
 
-    <h3>What is APT?</h3>
-    <p>
-        APT is the package management system used in Debian to install and manage software.
-    </p>
-</section>
+<div class="ref-table">
+  <div class="rt-row rt-head">
+    <div class="rt-cell">Tool</div>
+    <div class="rt-cell">apt package</div>
+    <div class="rt-cell">What it does</div>
+    <div class="rt-cell">Category</div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">iftop</div>
+    <div class="rt-cell rt-cmd">apt install iftop</div>
+    <div class="rt-cell">Real-time bandwidth usage per network connection. Shows source/destination and speed. Run as root.</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">nethogs</div>
+    <div class="rt-cell rt-cmd">apt install nethogs</div>
+    <div class="rt-cell">Bandwidth usage grouped by process — see which application uses the most bandwidth. Run as root.</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">nmap</div>
+    <div class="rt-cell rt-cmd">apt install nmap</div>
+    <div class="rt-cell">Network scanner. Discovers hosts, open ports, services, and OS fingerprinting. nmap -sV 192.168.1.0/24</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">ss</div>
+    <div class="rt-cell rt-cmd">apt install iproute2</div>
+    <div class="rt-cell">Socket statistics. Faster replacement for netstat. ss -tuln shows listening ports. ss -tp shows process names.</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">tcpdump</div>
+    <div class="rt-cell rt-cmd">apt install tcpdump</div>
+    <div class="rt-cell">CLI packet capture and analysis. tcpdump -i eth0 port 80. Save to file: -w capture.pcap</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">wireshark</div>
+    <div class="rt-cell rt-cmd">apt install wireshark</div>
+    <div class="rt-cell">GUI packet capture and protocol analysis. Add user to wireshark group: sudo usermod -aG wireshark $USER</div>
+    <div class="rt-cell"><span class="cat-badge cb-gui">GUI</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">bmon</div>
+    <div class="rt-cell rt-cmd">apt install bmon</div>
+    <div class="rt-cell">Terminal-based bandwidth monitor with graphs per network interface. Lightweight alternative to iftop.</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">mtr</div>
+    <div class="rt-cell rt-cmd">apt install mtr</div>
+    <div class="rt-cell">Combines traceroute and ping. Shows real-time per-hop latency and packet loss. mtr google.com</div>
+    <div class="rt-cell"><span class="cat-badge cb-net">Network</span></div>
+  </div>
+</div>
+
+<div class="code-block"><span class="cm"># Quick network monitoring one-liners</span>
+
+
+<span class="cm"># Real-time bandwidth per connection</span>
+<span class="ck">sudo</span> iftop -i eth0
+
+<span class="cm"># Which process uses the most bandwidth</span>
+<span class="ck">sudo</span> nethogs eth0
+
+<span class="cm"># Show all listening ports with process names</span>
+<span class="ck">ss</span> -tulpn
+
+<span class="cm"># Scan local network for active hosts</span>
+<span class="ck">nmap</span> -sn 192.168.1.0/24
+
+<span class="cm"># Capture HTTP traffic on eth0</span>
+<span class="ck">sudo</span> tcpdump -i eth0 <span class="cy">‘port 80’</span> -n
+
+<span class="cm"># Continuous traceroute with latency</span>
+<span class="ck">mtr</span> –report google.com</div>
+
+  </section>
+
+  <!-- SYSTEM MONITOR TOOLS -->
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Debian system monitor tools</span>
+      <span class="sec-rule"></span>
+    </div>
+    <p>The <strong>Debian system monitor</strong> ecosystem covers CPU, memory, load average, process management, and disk I/O. The default GNOME System Monitor provides a GUI, while CLI tools like htop, btop, and glances offer more detail without a desktop environment.</p>
+
+
+<div class="ref-table">
+  <div class="rt-row rt-head">
+    <div class="rt-cell">Tool</div>
+    <div class="rt-cell">apt package</div>
+    <div class="rt-cell">What it does</div>
+    <div class="rt-cell">Category</div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">htop</div>
+    <div class="rt-cell rt-cmd">apt install htop</div>
+    <div class="rt-cell">Interactive process viewer. CPU/memory bars, sortable columns, tree view, kill signals. Better than top.</div>
+    <div class="rt-cell"><span class="cat-badge cb-proc">Process</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">btop</div>
+    <div class="rt-cell rt-cmd">apt install btop</div>
+    <div class="rt-cell">Modern resource monitor with graphs for CPU, memory, disk, and network. Highly visual. Mouse support.</div>
+    <div class="rt-cell"><span class="cat-badge cb-sys">System</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">glances</div>
+    <div class="rt-cell rt-cmd">apt install glances</div>
+    <div class="rt-cell">All-in-one system monitor: CPU, memory, disk, network, sensors, processes. Web UI mode: glances -w</div>
+    <div class="rt-cell"><span class="cat-badge cb-sys">System</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">GNOME System Monitor</div>
+    <div class="rt-cell rt-cmd">apt install gnome-system-monitor</div>
+    <div class="rt-cell">GUI system monitor for Debian desktops. Shows processes, resources (CPU/RAM), and file systems.</div>
+    <div class="rt-cell"><span class="cat-badge cb-gui">GUI</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">iotop</div>
+    <div class="rt-cell rt-cmd">apt install iotop</div>
+    <div class="rt-cell">Disk I/O monitor per process. Shows read/write speeds. Helps identify processes causing disk bottlenecks.</div>
+    <div class="rt-cell"><span class="cat-badge cb-disk">Disk</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">ncdu</div>
+    <div class="rt-cell rt-cmd">apt install ncdu</div>
+    <div class="rt-cell">NCurses disk usage analyzer. Navigate directories and find space hogs. Much faster than du -sh.</div>
+    <div class="rt-cell"><span class="cat-badge cb-disk">Disk</span></div>
+  </div>
+  <div class="rt-row">
+    <div class="rt-cell rt-name">vmstat</div>
+    <div class="rt-cell rt-cmd">apt install procps</div>
+    <div class="rt-cell">Virtual memory, CPU, I/O, and process stats. vmstat 1 shows updates every second. Built into Debian.</div>
+    <div class="rt-cell"><span class="cat-badge cb-sys">System</span></div>
+  </div>
+</div>
+
+
+  </section>
+
+  <!-- GUIDE -->
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Network monitoring quick guide</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="dense-block">
+      <p><strong>Diagnosing bandwidth issues with iftop and nethogs</strong><br>
+      Start with <code>sudo iftop -i eth0</code> to see bandwidth per connection in real-time. The top bar shows aggregate speed. Use arrow keys to sort. Press <code>t</code> to toggle display mode. If you need to know which process is using bandwidth, switch to <code>sudo nethogs eth0</code> — it shows bandwidth grouped by PID and process name. Press <code>m</code> to toggle between KB/s and cumulative.</p>
+
+
+  <p><strong>Checking open ports with ss vs netstat</strong><br>
+  <code>ss</code> (from iproute2) is the modern replacement for <code>netstat</code> (from net-tools). Use <code>ss -tuln</code> to list all listening TCP/UDP ports without resolving hostnames. Add <code>-p</code> to show the process name: <code>ss -tulpn</code>. For a specific port: <code>ss -tulpn | grep :80</code>. Install net-tools for netstat: <code>sudo apt install net-tools</code>, then <code>netstat -tuln</code>.</p>
+
+  <p><strong>Monitoring CPU and memory in headless Debian servers</strong><br>
+  For servers without a desktop environment, <code>htop</code> is the standard choice — interactive, colorful, and available in all Debian versions. <code>btop</code> adds graphs and a more modern UI. <code>glances</code> adds network, disk, and sensor data in one view and can serve a web interface on port 61208 with <code>glances -w</code> for remote monitoring. Install all three: <code>sudo apt install htop btop glances</code>.</p>
+</div>
+
+
+  </section>
+
+  <!-- FAQ -->
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">FAQ — Debian monitoring</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What are the best Debian network monitoring tools?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a"><strong>For bandwidth per connection:</strong> <code>iftop</code>. <strong>For bandwidth per process:</strong> <code>nethogs</code>. <strong>For open ports:</strong> <code>ss -tulpn</code>. <strong>For network scanning:</strong> <code>nmap</code>. <strong>For packet capture:</strong> <code>tcpdump</code> (CLI) or <code>wireshark</code> (GUI). <strong>For routing issues:</strong> <code>mtr</code>. Install all at once: <code>sudo apt install iftop nethogs nmap tcpdump mtr bmon</code>.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What is the Debian system monitor?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a">GNOME System Monitor (<code>gnome-system-monitor</code>) is the default GUI system monitor on Debian GNOME desktops. For servers and headless systems, use CLI alternatives: <code>htop</code> (interactive process viewer), <code>btop</code> (modern with graphs), or <code>glances</code> (all-in-one including network and disk). Install: <code>sudo apt install htop btop glances</code>.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I install net-tools on Debian?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a"><code>sudo apt install net-tools</code> installs the classic networking tools: <code>netstat</code>, <code>ifconfig</code>, <code>route</code>, <code>arp</code>. Note: <code>net-tools</code> is considered deprecated — the modern replacements are <code>ss</code> (for netstat), <code>ip addr</code> (for ifconfig), and <code>ip route</code> (for route), all from the <code>iproute2</code> package which is installed by default in Debian.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I monitor network bandwidth on Debian?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a">Quick options: <code>sudo apt install iftop &amp;&amp; sudo iftop -i eth0</code> for real-time bandwidth per connection. <code>sudo apt install nethogs &amp;&amp; sudo nethogs</code> for bandwidth per process. <code>sudo apt install bmon &amp;&amp; bmon</code> for a bandwidth graph per interface. For cumulative stats: <code>cat /proc/net/dev</code> shows total bytes per interface since boot.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">More tools</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="subtools-grid">
+      <a href="deps/" class="stl"><p class="stl-eye">packages //</p><span class="stl-name">Dependency Analyzer</span></a>
+      <a href="repo/" class="stl"><p class="stl-eye">apt //</p><span class="stl-name">Repository Tool</span></a>
+      <a href="logs/" class="stl"><p class="stl-eye">logs //</p><span class="stl-name">Log Analyzer</span></a>
+      <a href="network/" class="stl"><p class="stl-eye">network //</p><span class="stl-name">Network Analyzer</span></a>
+      <a href="perf/" class="stl"><p class="stl-eye">perf //</p><span class="stl-name">Performance Tool</span></a>
+      <a href="service/" class="stl"><p class="stl-eye">systemd //</p><span class="stl-name">Service Manager</span></a>
+    </div>
+  </section>
+
+  <div class="tag-cloud">
+    <span class="tag">debian network monitoring tools</span>
+    <span class="tag">debian system monitor</span>
+    <span class="tag">debian net tools</span>
+    <span class="tag">debian network tools</span>
+    <span class="tag">iftop debian</span>
+    <span class="tag">nethogs debian</span>
+    <span class="tag">htop btop glances debian</span>
+    <span class="tag">nmap debian install</span>
+    <span class="tag">ss netstat debian</span>
+    <span class="tag">debian bandwidth monitor</span>
+    <span class="tag">debian apt monitoring tools</span>
+  </div>
+
+</div>
 
 <footer>
-    <p>
-        Manage and optimize your Linux environment with advanced <strong>Debian system tools</strong>
-        for performance, monitoring, and reliability.
-    </p>
+  <div class="footer-inner">
+    <p>debian-network-monitoring-tools &middot; system monitor &middot; free reference</p>
+    <p>apt install &middot; iftop &middot; nethogs &middot; htop &middot; btop &middot; glances</p>
+  </div>
 </footer>
+
+<script>
+var TOOLS = [
+  { id: 'iftop',     cat: 'network',  pkg: 'iftop',               desc: 'Bandwidth per connection' },
+  { id: 'nethogs',   cat: 'network',  pkg: 'nethogs',             desc: 'Bandwidth per process' },
+  { id: 'nmap',      cat: 'network',  pkg: 'nmap',                desc: 'Network scanner' },
+  { id: 'tcpdump',   cat: 'network',  pkg: 'tcpdump',             desc: 'Packet capture' },
+  { id: 'mtr',       cat: 'network',  pkg: 'mtr',                 desc: 'Traceroute + ping' },
+  { id: 'bmon',      cat: 'network',  pkg: 'bmon',                desc: 'Bandwidth monitor' },
+  { id: 'net-tools', cat: 'network',  pkg: 'net-tools',           desc: 'netstat, ifconfig' },
+  { id: 'htop',      cat: 'process',  pkg: 'htop',                desc: 'Interactive process viewer' },
+  { id: 'btop',      cat: 'system',   pkg: 'btop',                desc: 'Resource monitor with graphs' },
+  { id: 'glances',   cat: 'system',   pkg: 'glances',             desc: 'All-in-one monitor + web UI' },
+  { id: 'sysstat',   cat: 'system',   pkg: 'sysstat',             desc: 'sar, iostat, mpstat' },
+  { id: 'iotop',     cat: 'disk',     pkg: 'iotop',               desc: 'Disk I/O per process' },
+  { id: 'ncdu',      cat: 'disk',     pkg: 'ncdu',                desc: 'Disk usage explorer' },
+  { id: 'dstat',     cat: 'system',   pkg: 'dstat',               desc: 'Versatile resource stats' },
+  { id: 'wireshark', cat: 'gui',      pkg: 'wireshark',           desc: 'GUI packet capture' },
+  { id: 'gnome-sys', cat: 'gui',      pkg: 'gnome-system-monitor',desc: 'GNOME System Monitor' }
+];
+
+var selected = {};
+var currentFilter = 'all';
+
+function buildGrid() {
+  var grid = document.getElementById('toolGrid');
+  grid.innerHTML = '';
+  TOOLS.forEach(function(t) {
+    if (currentFilter !== 'all' && t.cat !== currentFilter) return;
+    var btn = document.createElement('div');
+    btn.className = 'tool-toggle' + (selected[t.id] ? ' selected' : '');
+    btn.onclick = function() { toggleTool(t.id, btn); };
+
+    var catEl = document.createElement('span');
+    catEl.className = 'tt-cat';
+    catEl.textContent = t.cat;
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'tt-name';
+    nameEl.textContent = t.id;
+
+    var descEl = document.createElement('span');
+    descEl.className = 'tt-desc';
+    descEl.textContent = t.desc;
+
+    btn.appendChild(catEl);
+    btn.appendChild(nameEl);
+    btn.appendChild(descEl);
+    grid.appendChild(btn);
+  });
+}
+
+function toggleTool(id, btn) {
+  if (selected[id]) {
+    delete selected[id];
+    btn.classList.remove('selected');
+  } else {
+    selected[id] = true;
+    btn.classList.add('selected');
+  }
+  updateCmd();
+}
+
+function updateCmd() {
+  var pkgs = TOOLS.filter(function(t) { return selected[t.id]; }).map(function(t) { return t.pkg; });
+  var cmdEl = document.getElementById('cmdText');
+  var copyBtn = document.getElementById('copyBtn');
+  if (pkgs.length === 0) {
+    cmdEl.textContent = 'Select tools above to generate the apt install command';
+    cmdEl.className = 'cmd-text cmd-placeholder';
+    copyBtn.style.display = 'none';
+  } else {
+    var cmd = 'sudo apt update && sudo apt install -y ' + pkgs.join(' ');
+    cmdEl.textContent = cmd;
+    cmdEl.className = 'cmd-text';
+    copyBtn.style.display = 'inline-block';
+  }
+}
+
+function filterTools(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-tab').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  buildGrid();
+}
+
+function clearSelection() {
+  selected = {};
+  buildGrid();
+  updateCmd();
+}
+
+function copyCmd() {
+  var text = document.getElementById('cmdText').textContent;
+  if (!text || text.indexOf('Select tools') !== -1) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(showCopy);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopy();
+  }
+}
+
+function showCopy() {
+  var fb = document.getElementById('copyFb');
+  fb.style.display = 'inline';
+  setTimeout(function() { fb.style.display = 'none'; }, 2000);
+}
+
+function toggleFaq(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+buildGrid();
+</script>
 
 </body>
 </html>
